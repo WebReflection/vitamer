@@ -1,5 +1,5 @@
 {
-  "version": "0.0.0",
+  "version": "0.0.1",
   "license": "MIT",
   "name": "vitamer",
   "description": "",
@@ -17,7 +17,15 @@
   "scripts": {
     "test": "node test/.test.js||phantomjs testrunner.js",
     "web": "node node_modules/tiny-cdn/tiny-cdn run -p=1337",
-    "install-global-dev": "node -e '(function(o){for(var k in o)require(\"child_process\").spawn(\"npm\",[\"install\",\"-g\",k+\"@\"+o[k]]).on(\"exit\",console.log.bind(console,k+\"@\"+o[k]));}(require(\"package.json\").globalDevDependencies))'"
+    "install-global-dev": "node -e '(function(o){for(var k in o)require(\"child_process\").spawn(\"npm\",[\"install\",\"-g\",k+\"@\"+o[k]]).on(\"exit\",console.log.bind(console,k+\"@\"+o[k]));}(require(\"package.json\").globalDevDependencies))'",
+    "clean": "rm build/*",
+    "build": "npm run build-license && npm run min && npm run max && npm run node && npm run amd && rm build/_license",
+    "build-license": "cat template/license.before LICENSE.txt template/license.after > build/_license",
+    "min": "cat build/_license > build/vitamer.js && browserify src/vitamer.js | uglifyjs >> build/vitamer.js",
+    "max": "browserify src/vitamer.max.js > build/vitamer.max.js",
+    "node": "cat build/_license > build/vitamer.node.js && npm run node-mixins && browserify --standalone Vitamer src/vitamer.node.js | uglifyjs >> build/vitamer.node.js",
+    "node-mixins": "echo 'module.exports = function( DOMClass ){' | cat - node_modules/dom-class/build/dom-class-mixins.js > node_modules/dom-class/build/dom-class-mixins.node.js && echo '; return DOMClass};' >> node_modules/dom-class/build/dom-class-mixins.node.js",
+    "amd": "cat build/vitamer.node.js | derequire > build/vitamer.amd.js"
   },
   "globalDevDependencies": {
     "uglify-js": "1",
@@ -28,6 +36,15 @@
     "tiny-cdn": "*"
   },
   "devDependencies": {
+    "derequire": "^2.0.3",
     "wru": "*"
+  },
+  "dependencies": {
+    "document-register-element": "^0.5.3",
+    "dom-class": "^0.5.0",
+    "dom4": "^1.5.2",
+    "es-class": "^2.1.1",
+    "query-result": "^0.1.3",
+    "restyle": "^0.5.1"
   }
 }
